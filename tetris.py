@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import supertext as st
 import random
+import time
 
 sx=15
 sy=0
@@ -281,4 +282,5 @@ def main():
 if __name__=='__main__':
     main()
     exit(0)
+
 
