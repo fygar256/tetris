@@ -31,9 +31,9 @@ tetris=[ [['#',
           ['## ',
            ' ##']],
 
-         [['# ',
-           '##',
-           '# '],
+         [[' # ',
+           ' ##',
+           ' # '],
 
           [' # ',
            '###'],
@@ -48,9 +48,9 @@ tetris=[ [['#',
          [['##',
            '##']],
 
-         [['##',
-           ' #',
-           ' #'],
+         [[' ##',
+           '  #',
+           '  #'],
 
           ['###',
            '#  '],
@@ -69,9 +69,9 @@ tetris=[ [['#',
           ['#  ',
            '###'],
 
-          [' #',
-           ' #',
-           '##'],
+          ['  #',
+           '  #',
+           ' ##'],
 
           ['###',
            '  #']] ]
@@ -211,6 +211,8 @@ def main():
             break
         if st.getkey('q'):
             return
+    land=False
+    lend=False
     while(1):
         counter+=1
         erase(x,y,m,t,tetris)
@@ -228,10 +230,17 @@ def main():
                 spf=1
         else:
             spf=0
-        y+=1 if counter%2 else 0
+
+        y+=1 if counter%2 and not land else 0
+
         if canputp(x+dx,y,m,t,tetris):
             put(x+dx,y,m,t,tetris)
             x=x+dx
+            if land:
+                if not canputp(x,y+1,m,t,tetris):
+                    lend=True
+                else:
+                    land=False
         else:
             m=savem
             if canputp(x,y,m,t,tetris):
@@ -240,11 +249,30 @@ def main():
                 x=savex
                 y=savey
                 put(x,y,m,t,tetris)
-                l=linecheck()
-                number_of_lines+=l
-                score+=2**l*100
-                (x,y,m,t)=place_tetris(tetris)
-                gameover=x==-1
+                land=True
+                st.sleep(wait)
+                a1,b1,pat1=getpat(m,t,tetris)
+                a2,b2,pat2=getpat(savem,t,tetris)
+                if len(pat1)<len(pat2):
+                    land=False
+                    lend=False
+                continue
+
+        a1,b1,pat1=getpat(m,t,tetris)
+        a2,b2,pat2=getpat(savem,t,tetris)
+        if len(pat1)<len(pat2):
+            land=False
+            lend=False
+
+        if lend:
+            l=linecheck()
+            number_of_lines+=l
+            score+=2**l*100
+            (x,y,m,t)=place_tetris(tetris)
+            land=False
+            lend=False
+            gameover=x==-1
+
         if gameover:
             st.locate(17,12)
             st.color((255,0,0))
@@ -258,6 +286,7 @@ def main():
             while(st.getkey('q')==0):
                 st.sleep(0.1)
             return
+
         score+=1
         st.locate(0,0)
         st.color((0,255,0))
@@ -282,5 +311,3 @@ def main():
 if __name__=='__main__':
     main()
     exit(0)
-
-
