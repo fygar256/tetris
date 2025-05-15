@@ -253,14 +253,14 @@ def main():
                 st.sleep(wait)
                 a1,b1,pat1=getpat(m,t,tetris)
                 a2,b2,pat2=getpat(savem,t,tetris)
-                if len(pat1)<len(pat2):
+                if land and len(pat1)<len(pat2):
                     land=False
                     lend=False
                 continue
 
         a1,b1,pat1=getpat(m,t,tetris)
         a2,b2,pat2=getpat(savem,t,tetris)
-        if len(pat1)<len(pat2):
+        if land and len(pat1)<len(pat2):
             land=False
             lend=False
 
