@@ -91,43 +91,30 @@ def getpat(m,t,tetris):
     return (tetriscolor[t],m,tetris[t][m])
 
 def canputp(x,y,m,t,tetris):
-    ay=0
     (col,m,pat)=getpat(m,t,tetris)
 
-    for i in pat:
-        ax=0
-        for c in i:
-            if c=='#':
-                if st.peek(sx+x+ax,sy+y+ay)!=chr(0):
-                    return 0
-            ax+=1
-        ay+=1
+    for ay,i in enumerate(pat):
+        for ax,c in enumerate(i):
+            if c=='#' and st.peek(sx+x+ax,sy+y+ay)!=chr(0):
+                return 0
     return 1
 
 def put(x,y,m,t,tetris):
     (col,m,pat)=getpat(m,t,tetris)
     st.color(col)
-    ay=0
-    for i in pat:
-        ax=0
-        for c in i:
+    for ay,i in enumerate(pat):
+        for ax,c in enumerate(i):
             if c=='#':
                 st.locate(sx+x+ax,sy+y+ay)
                 st.putchar(chr(0x97))
-            ax+=1
-        ay+=1
 
 def erase(x,y,m,t,tetris):
-    ay=0
     (col,m,pat)=getpat(m,t,tetris)
-    for i in pat:
-        ax=0
-        for c in i:
+    for ay,i in enumerate(pat):
+        for ax,c in enumerate(i):
             if c=='#':
                 st.locate(sx+x+ax,sy+y+ay)
                 st.putchar(chr(0))
-            ax+=1
-        ay+=1
 
 def draw_frame():
     for y in range(0,25):
@@ -251,11 +238,6 @@ def main():
                 put(x,y,m,t,tetris)
                 land=True
                 st.sleep(wait)
-                a1,b1,pat1=getpat(m,t,tetris)
-                a2,b2,pat2=getpat(savem,t,tetris)
-                if land and len(pat1)<len(pat2):
-                    land=False
-                    lend=False
                 continue
 
         a1,b1,pat1=getpat(m,t,tetris)
