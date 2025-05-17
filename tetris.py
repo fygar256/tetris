@@ -221,13 +221,13 @@ def main():
         y+=1 if counter%2 and not land else 0
 
         if canputp(x+dx,y,m,t,tetris):
-            put(x+dx,y,m,t,tetris)
             x=x+dx
             if land:
                 if not canputp(x,y+1,m,t,tetris):
                     lend=True
                 else:
                     land=False
+            put(x,y,m,t,tetris)
         else:
             m=savem
             if canputp(x,y,m,t,tetris):
@@ -239,12 +239,6 @@ def main():
                 land=True
                 st.sleep(wait)
                 continue
-
-        a1,b1,pat1=getpat(m,t,tetris)
-        a2,b2,pat2=getpat(savem,t,tetris)
-        if land and len(pat1)<len(pat2):
-            land=False
-            lend=False
 
         if lend:
             l=linecheck()
