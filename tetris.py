@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import supertext as st
 import random
 import time
@@ -9,6 +9,19 @@ mx=10
 number_of_tetris=0
 nextt=-1
 tetriscolor=[(255,0,0),(0,255,0),(255,0,255),(0,255,255),(255,255,0),(0,0,255),(255,255,255)]
+
+kicks=[(0,0),
+       (-1,0),(1,0),
+       (0,-1),
+       (-1,-1),(1,-1),
+       (-2,0),(2,0),
+       (-2,-1),(2,-1),
+       (0,1),(-1,1),(1,1)]
+
+ikicks=[(0,-2),(0,-3),(-3,0),(3,0),(0,2),(0,3)]
+
+lockdelay=0.5
+lockresetmax=15
 
 tetris=[ [['#',
            '#',
@@ -95,9 +108,20 @@ def canputp(x,y,m,t,tetris):
 
     for ay,i in enumerate(pat):
         for ax,c in enumerate(i):
-            if c=='#' and st.peek(sx+x+ax,sy+y+ay)!=chr(0):
+            if c!='#':
+                continue
+            if x+ax<1 or x+ax>mx or y+ay<0 or y+ay>=24:
+                return 0
+            if st.peek(sx+x+ax,sy+y+ay)!=chr(0):
                 return 0
     return 1
+
+def rotate(x,y,m,t,tetris):
+    nm=(m+1)%len(tetris[t])
+    for (dx,dy) in (kicks+ikicks if t==0 else kicks):
+        if canputp(x+dx,y+dy,nm,t,tetris):
+            return (x+dx,y+dy,nm)
+    return (x,y,m)
 
 def put(x,y,m,t,tetris):
     (col,m,pat)=getpat(m,t,tetris)
@@ -198,54 +222,58 @@ def main():
             break
         if st.getkey('q'):
             return
-    land=False
+    land=None
+    resets=0
     lend=False
+    wait=difficulty(number_of_tetris)
     while(1):
         counter+=1
         erase(x,y,m,t,tetris)
-        (savem,savex,savey)=(m,x,y)
-        dx=0
+        moved=False
         if st.getkey('q'):
             return
-        if st.getkey('4'):
-            dx=-1
-        if st.getkey('6'):
-            dx=1
         if st.getkey('space'):
             if not spf:
-                m=m+1
+                (nx,ny,nm)=rotate(x,y,m,t,tetris)
+                moved=(nx,ny,nm)!=(x,y,m)
+                (x,y,m)=(nx,ny,nm)
                 spf=1
         else:
             spf=0
 
-        y+=1 if counter%2 and not land else 0
-
-        if canputp(x+dx,y,m,t,tetris):
+        dx=0
+        if st.getkey('4'):
+            dx=-1
+        if st.getkey('6'):
+            dx=1
+        if dx and canputp(x+dx,y,m,t,tetris):
             x=x+dx
-            if land:
-                if not canputp(x,y+1,m,t,tetris):
-                    lend=True
-                else:
-                    land=False
-            put(x,y,m,t,tetris)
+            moved=True
+
+        if counter%2 and canputp(x,y+1,m,t,tetris):
+            y+=1
+
+        landed=not canputp(x,y+1,m,t,tetris)
+        put(x,y,m,t,tetris)
+
+        if not landed:
+            land=None
+            resets=0
         else:
-            m=savem
-            if canputp(x,y,m,t,tetris):
-                put(x,y,m,t,tetris)
-            else:
-                x=savex
-                y=savey
-                put(x,y,m,t,tetris)
-                land=True
-                st.sleep(wait)
-                continue
+            if land==None:
+                land=time.time()
+            elif moved and resets<lockresetmax:
+                land=time.time()
+                resets+=1
+            lend=time.time()-land>=lockdelay
 
         if lend:
             l=linecheck()
             number_of_lines+=l
             score+=2**l*100
             (x,y,m,t)=place_tetris(tetris)
-            land=False
+            land=None
+            resets=0
             lend=False
             gameover=x==-1
 
